@@ -30,14 +30,14 @@ var (
 )
 
 
-func Normalize2 (v * [2]float64) {
+func normalize2 (v * [2]float64) {
   s := math.Sqrt(v[0] * v[0] + v[1] * v[1]);
   v[0] = v[0] / s;
   v[1] = v[1] / s;
 }
 
 
-func Normalize3 (v * [3]float64) {
+func normalize3 (v * [3]float64) {
   s := math.Sqrt (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
   v[0] = v[0] / s;
   v[1] = v[1] / s;
@@ -45,7 +45,7 @@ func Normalize3 (v * [3]float64) {
 }
 
 
-func PerlinInit() {
+func perlinInit() {
   var i int
 
   for i = 0; i < B; i++ {
@@ -56,12 +56,12 @@ func PerlinInit() {
       g2[i][j] =  float64((rand.Int() % (B + B)) - B) / B
     }
 
-    Normalize2 (&g2[i]);
+    normalize2 (&g2[i]);
 
     for j := 0; j < 3; j++ {
       g3[i][j] = float64((rand.Int() % (B + B)) - B) / B
     }
-    Normalize3 (&g3[i])
+    normalize3 (&g3[i])
   }
 
 
@@ -84,22 +84,22 @@ func PerlinInit() {
   }
 }
 
-func SCurve(t float64) (float64){
+func sCurve(t float64) (float64){
   return t * t * (3. - 2. * t)
 }
 
-func Lerp(t, a, b float64) (float64) {
+func lerp(t, a, b float64) (float64) {
   return a + t * (b - a) ;
 }
 
-func Noise1(arg float64) (float64) {
+func noise1(arg float64) (float64) {
 
   var vec[1]float64
   vec[0] = arg
 
   if (!start){
     start = true
-    PerlinInit()
+    perlinInit()
   }
 
   t := vec[0] + N
@@ -108,12 +108,63 @@ func Noise1(arg float64) (float64) {
   rx0 := t - float64(int(t))
   rx1 := rx0 - 1.
 
-  sx := SCurve (rx0);
+  sx := sCurve (rx0);
   u := rx0 * g1[p[bx0]];
   v := rx1 * g1[p[bx1]];
 
-  return Lerp(sx, u, v);
+  return lerp(sx, u, v);
 }
+
+func at2(rx, ry float64, q[2]float64) (float64) {
+  return rx * q[0] + ry * q[1] 
+}
+
+func noise2 (vec[2]float64) (float64) {
+
+  if (!start){
+    start = true;
+    perlinInit ();
+  }
+
+  t := vec[0] + N
+  bx0 := int(t) & BM
+  bx1 := (bx0 + 1) & BM
+  rx0 := t - float64(int(t))
+  rx1 := rx0 - 1.
+
+  t = vec[1] + N
+  by0 := int(t) & BM
+  by1 := (by0 + 1) & BM
+  ry0 := t - float64(int(t))
+  ry1 := ry0 - 1.
+
+  i := p[bx0];
+  j := p[bx1];
+
+  b00 := p[i + by0];
+  b10 := p[j + by0];
+  b01 := p[i + by1];
+  b11 := p[j + by1];
+
+  sx := sCurve (rx0);
+  sy := sCurve (ry0);
+
+  q := g2[b00];
+  u := at2 (rx0, ry0, q);
+  q = g2[b10];
+  v := at2 (rx1, ry0, q);
+  a := lerp (sx, u, v);
+
+  q = g2[b01];
+  u = at2 (rx0, ry1, q);
+  q = g2[b11];
+  v = at2 (rx1, ry1, q);
+  b := lerp (sx, u, v);
+
+  return lerp (sy, a, b);
+}
+
+
 
 /*
    In what follows "alpha" is the weight when the sum is formed.
@@ -127,7 +178,7 @@ func PerlinNoise1D (x, alpha, beta float64, n int) (float64) {
   p := x;
 
   for i := 0; i < n; i++ {
-    val := Noise1(p);
+    val := noise1(p);
     sum += val / scale;
     scale *= alpha;
     p *= beta;
@@ -135,7 +186,23 @@ func PerlinNoise1D (x, alpha, beta float64, n int) (float64) {
   return sum;
 }
 
+func PerlinNoise2D (x, y, alpha, beta float64, n int) (float64) {
+  var scale float64 = 1;
+  var sum float64 = 0;
+  var p[2]float64;
 
+  p[0] = x;
+  p[1] = y;
+
+  for i := 0; i < n; i++ {
+    val := noise2(p);
+    sum += val / scale;
+    scale *= alpha;
+    p[0] *= beta;
+    p[1] *= beta;
+  }
+  return sum;
+}
 
 func main (){
   var alpha float64 = 2;
