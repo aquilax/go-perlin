@@ -1,13 +1,12 @@
+package perlin 
+
 /*
 * Addapted from git://git.gnome.org/gegl/operations/common/perlin/perlin.c
 *  Coherent noise function over 1, 2 or 3 dimensions
 * (copyright Ken Perlin)
 */
 
-package main
-
 import (
-  "fmt"
   "math"
   "rand"
 )
@@ -26,9 +25,7 @@ var (
   g3[B + B + 2][3]float64
   g2[B + B + 2][2]float64
   g1[B + B + 2]float64
-
 )
-
 
 func normalize2 (v * [2]float64) {
   s := math.Sqrt(v[0] * v[0] + v[1] * v[1]);
@@ -67,7 +64,7 @@ func perlinInit() {
 
   for i = i; i > 0; i-- {
     k := p[i]
-    j := rand.Int() % B 
+    j := rand.Int() % B
     p[i] = p[j];
     p[j] = k;
   }
@@ -82,6 +79,14 @@ func perlinInit() {
       g3[B + i][j] = g3[i][j];
     }
   }
+}
+
+func at2(rx, ry float64, q[2]float64) (float64) {
+  return rx * q[0] + ry * q[1]
+}
+
+func at3(rx, ry, rz float64, q[3]float64) (float64) {
+  return rx * q[0] + ry * q[1] + rz * q[2]
 }
 
 func sCurve(t float64) (float64){
@@ -113,10 +118,6 @@ func noise1(arg float64) (float64) {
   v := rx1 * g1[p[bx1]];
 
   return lerp(sx, u, v);
-}
-
-func at2(rx, ry float64, q[2]float64) (float64) {
-  return rx * q[0] + ry * q[1] 
 }
 
 func noise2 (vec[2]float64) (float64) {
@@ -164,6 +165,73 @@ func noise2 (vec[2]float64) (float64) {
   return lerp (sy, a, b);
 }
 
+func noise3 (vec [3]float64) (float64) {
+
+  if (!start){
+    start = true;
+    perlinInit ();
+  }
+
+  t := vec[0] + N
+  bx0 := int(t) & BM
+  bx1 := (bx0 + 1) & BM
+  rx0 := t - float64(int(t))
+  rx1 := rx0 - 1.
+
+  t = vec[1] + N
+  by0 := int(t) & BM
+  by1 := (by0 + 1) & BM
+  ry0 := t - float64(int(t))
+  ry1 := ry0 - 1.
+
+  t = vec[2] + N
+  bz0 := int(t) & BM
+  bz1 := (bz0 + 1) & BM
+  rz0 := t - float64(int(t))
+  rz1 := rz0 - 1.
+
+  i := p[bx0]
+  j := p[bx1]
+
+  b00 := p[i + by0]
+  b10 := p[j + by0]
+  b01 := p[i + by1]
+  b11 := p[j + by1]
+
+  t = sCurve (rx0);
+  sy := sCurve (ry0)
+  sz := sCurve (rz0)
+
+  q := g3[b00 + bz0];
+  u := at3 (rx0, ry0, rz0, q);
+  q = g3[b10 + bz0];
+  v := at3 (rx1, ry0, rz0, q);
+  a := lerp (t, u, v);
+
+  q = g3[b01 + bz0];
+  u = at3 (rx0, ry1, rz0, q);
+  q = g3[b11 + bz0];
+  v = at3 (rx1, ry1, rz0, q);
+  b := lerp (t, u, v);
+
+  c := lerp (sy, a, b);
+
+  q = g3[b00 + bz1];
+  u = at3 (rx0, ry0, rz1, q);
+  q = g3[b10 + bz1];
+  v = at3 (rx1, ry0, rz1, q);
+  a = lerp (t, u, v);
+
+  q = g3[b01 + bz1];
+  u = at3 (rx0, ry1, rz1, q);
+  q = g3[b11 + bz1];
+  v = at3 (rx1, ry1, rz1, q);
+  b = lerp (t, u, v);
+
+  d := lerp (sy, a, b);
+
+  return lerp (sz, c, d);
+}
 
 
 /*
@@ -187,29 +255,43 @@ func PerlinNoise1D (x, alpha, beta float64, n int) (float64) {
 }
 
 func PerlinNoise2D (x, y, alpha, beta float64, n int) (float64) {
-  var scale float64 = 1;
-  var sum float64 = 0;
-  var p[2]float64;
+  var scale float64 = 1
+  var sum float64 = 0
+  var p[2]float64
 
-  p[0] = x;
-  p[1] = y;
+  p[0] = x
+  p[1] = y
 
   for i := 0; i < n; i++ {
-    val := noise2(p);
-    sum += val / scale;
-    scale *= alpha;
-    p[0] *= beta;
-    p[1] *= beta;
+    val := noise2(p)
+    sum += val / scale
+    scale *= alpha
+    p[0] *= beta
+    p[1] *= beta
   }
-  return sum;
+  return sum
 }
 
-func main (){
-  var alpha float64 = 2;
-  var beta float64 = 2;
 
-  for x := 1; x < 100; x++ {
-    fmt.Printf("%d;%0.8f\n",x, PerlinNoise1D(float64(x)/10, alpha, beta, 3))
+func PerlinNoise3D (x, y, z, alpha, beta float64, n int) (float64){
+  var scale float64 = 1
+  var sum float64 = 0
+  var p[3]float64
+
+  if z < 0.0000 {
+    return PerlinNoise2D (x, y, alpha, beta, n)
   }
-}
+  p[0] = x
+  p[1] = y
+  p[2] = z
 
+  for i := 0; i < n; i++ {
+    val := noise3(p)
+    sum += val / scale
+    scale *= alpha
+    p[0] *= beta
+    p[1] *= beta
+    p[2] *= beta
+  }
+  return sum
+}
