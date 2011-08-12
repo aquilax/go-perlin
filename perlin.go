@@ -115,9 +115,34 @@ func Noise1(arg float64) (float64) {
   return Lerp(sx, u, v);
 }
 
+/*
+   In what follows "alpha" is the weight when the sum is formed.
+   Typically it is 2, As this approaches 1 the function is noisier.
+   "beta" is the harmonic scaling/spacing, typically 2.
+*/
+
+func PerlinNoise1D (x, alpha, beta float64, n int) (float64) {
+  var scale float64 = 1;
+  var sum float64 = 0;
+  p := x;
+
+  for i := 0; i < n; i++ {
+    val := Noise1(p);
+    sum += val / scale;
+    scale *= alpha;
+    p *= beta;
+  }
+  return sum;
+}
+
+
+
 func main (){
-  for x := 1; x < 1500; x = x+10 {
-    fmt.Printf("%d\t%0.8f\n",x, Noise1(float64(x)/100))
+  var alpha float64 = 2;
+  var beta float64 = 2;
+
+  for x := 1; x < 100; x++ {
+    fmt.Printf("%d;%0.8f\n",x, PerlinNoise1D(float64(x)/10, alpha, beta, 3))
   }
 }
 
