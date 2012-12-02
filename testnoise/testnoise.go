@@ -1,7 +1,7 @@
 package main
 
 import (
-	"perlin"
+	"github.com/aquilax/go-perlin"
 	"fmt"
 	"os"
 )

@@ -8,7 +8,8 @@ package perlin
 
 import (
 	"math"
-	"rand"
+	"math/rand"
+	"time"
 )
 
 const (
@@ -27,6 +28,9 @@ var (
 	g1 [B + B + 2]float64
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 func normalize2(v *[2]float64) {
 	s := math.Sqrt(v[0]*v[0] + v[1]*v[1])
 	v[0] = v[0] / s
