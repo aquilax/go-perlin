@@ -1,8 +1,8 @@
 package main
 
 import (
-	"perlin"
 	"fmt"
+	"github.com/aquilax/go-perlin"
 	"os"
 )
 
@@ -11,7 +11,6 @@ const (
 	beta  = 2.
 	n     = 3
 )
-
 
 func show1d() {
 	for x := 0.; x < 100; x++ {
