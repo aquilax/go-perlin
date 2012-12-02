@@ -37,14 +37,12 @@ func normalize2(v *[2]float64) {
 	v[1] = v[1] / s
 }
 
-
 func normalize3(v *[3]float64) {
 	s := math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
 	v[0] = v[0] / s
 	v[1] = v[1] / s
 	v[2] = v[2] / s
 }
-
 
 func perlinInit() {
 	var i int
@@ -236,7 +234,6 @@ func noise3(vec [3]float64) float64 {
 	return lerp(sz, c, d)
 }
 
-
 /*
    In what follows "alpha" is the weight when the sum is formed.
    Typically it is 2, As this approaches 1 the function is noisier.
@@ -274,7 +271,6 @@ func PerlinNoise2D(x, y, alpha, beta float64, n int) float64 {
 	}
 	return sum
 }
-
 
 func PerlinNoise3D(x, y, z, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
