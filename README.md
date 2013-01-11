@@ -2,6 +2,8 @@ GO Perlin Noise generator
 
 Adapted for go from GEGL http://git.gnome.org/browse/gegl/tree/operations/common/perlin
 
+[![Build Status](https://travis-ci.org/aquilax/go-perlin.png?branch=master)](https://travis-ci.org/aquilax/go-perlin)
+
 Example: PerlinNoise1D
 
     alpha = 2
