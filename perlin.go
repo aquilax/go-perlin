@@ -1,10 +1,8 @@
 package perlin
 
-/*
-* Addapted from git://git.gnome.org/gegl/operations/common/perlin/perlin.c
-*  Coherent noise function over 1, 2 or 3 dimensions
-* (copyright Ken Perlin)
- */
+// Addapted from http://git.gnome.org/browse/gegl/tree/operations/common/perlin/perlin.c
+//  Coherent noise function over 1, 2 or 3 dimensions
+// (copyright Ken Perlin)
 
 import (
 	"math"
@@ -234,12 +232,11 @@ func noise3(vec [3]float64) float64 {
 	return lerp(sz, c, d)
 }
 
-/*
-   In what follows "alpha" is the weight when the sum is formed.
-   Typically it is 2, As this approaches 1 the function is noisier.
-   "beta" is the harmonic scaling/spacing, typically 2.
-*/
+// In what follows "alpha" is the weight when the sum is formed.
+// Typically it is 2, As this approaches 1 the function is noisier.
+// "beta" is the harmonic scaling/spacing, typically 2.
 
+// Generates 1-dimensional Perlin Noise
 func PerlinNoise1D(x, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
 	var sum float64 = 0
@@ -254,6 +251,7 @@ func PerlinNoise1D(x, alpha, beta float64, n int) float64 {
 	return sum
 }
 
+// Generates 2-dimensional Perlin Noise
 func PerlinNoise2D(x, y, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
 	var sum float64 = 0
@@ -272,6 +270,7 @@ func PerlinNoise2D(x, y, alpha, beta float64, n int) float64 {
 	return sum
 }
 
+// Generates 3-dimensional Perlin Noise
 func PerlinNoise3D(x, y, z, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
 	var sum float64 = 0
