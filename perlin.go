@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// General constants
 const (
 	B  = 0x100
 	N  = 0x1000
@@ -17,8 +18,6 @@ const (
 )
 
 var (
-	start bool = false
-
 	p [B + B + 2]int
 
 	g3 [B + B + 2][3]float64
@@ -28,21 +27,7 @@ var (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-}
-func normalize2(v *[2]float64) {
-	s := math.Sqrt(v[0]*v[0] + v[1]*v[1])
-	v[0] = v[0] / s
-	v[1] = v[1] / s
-}
 
-func normalize3(v *[3]float64) {
-	s := math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
-	v[0] = v[0] / s
-	v[1] = v[1] / s
-	v[2] = v[2] / s
-}
-
-func perlinInit() {
 	var i int
 
 	for i = 0; i < B; i++ {
@@ -61,7 +46,7 @@ func perlinInit() {
 		normalize3(&g3[i])
 	}
 
-	for i = i; i > 0; i-- {
+	for ; i > 0; i-- {
 		k := p[i]
 		j := rand.Int() % B
 		p[i] = p[j]
@@ -78,6 +63,20 @@ func perlinInit() {
 			g3[B+i][j] = g3[i][j]
 		}
 	}
+
+}
+
+func normalize2(v *[2]float64) {
+	s := math.Sqrt(v[0]*v[0] + v[1]*v[1])
+	v[0] = v[0] / s
+	v[1] = v[1] / s
+}
+
+func normalize3(v *[3]float64) {
+	s := math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+	v[0] = v[0] / s
+	v[1] = v[1] / s
+	v[2] = v[2] / s
 }
 
 func at2(rx, ry float64, q [2]float64) float64 {
@@ -101,11 +100,6 @@ func noise1(arg float64) float64 {
 	var vec [1]float64
 	vec[0] = arg
 
-	if !start {
-		start = true
-		perlinInit()
-	}
-
 	t := vec[0] + N
 	bx0 := int(t) & BM
 	bx1 := (bx0 + 1) & BM
@@ -120,11 +114,6 @@ func noise1(arg float64) float64 {
 }
 
 func noise2(vec [2]float64) float64 {
-
-	if !start {
-		start = true
-		perlinInit()
-	}
 
 	t := vec[0] + N
 	bx0 := int(t) & BM
@@ -165,12 +154,6 @@ func noise2(vec [2]float64) float64 {
 }
 
 func noise3(vec [3]float64) float64 {
-
-	if !start {
-		start = true
-		perlinInit()
-	}
-
 	t := vec[0] + N
 	bx0 := int(t) & BM
 	bx1 := (bx0 + 1) & BM
@@ -232,14 +215,13 @@ func noise3(vec [3]float64) float64 {
 	return lerp(sz, c, d)
 }
 
+// Noise1D generates 1-dimensional Perlin Noise value
 // In what follows "alpha" is the weight when the sum is formed.
 // Typically it is 2, As this approaches 1 the function is noisier.
 // "beta" is the harmonic scaling/spacing, typically 2.
-
-// Generates 1-dimensional Perlin Noise
-func PerlinNoise1D(x, alpha, beta float64, n int) float64 {
+func Noise1D(x, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
-	var sum float64 = 0
+	var sum float64
 	p := x
 
 	for i := 0; i < n; i++ {
@@ -251,10 +233,13 @@ func PerlinNoise1D(x, alpha, beta float64, n int) float64 {
 	return sum
 }
 
-// Generates 2-dimensional Perlin Noise
-func PerlinNoise2D(x, y, alpha, beta float64, n int) float64 {
+// Noise2D Generates 2-dimensional Perlin Noise value
+// In what follows "alpha" is the weight when the sum is formed.
+// Typically it is 2, As this approaches 1 the function is noisier.
+// "beta" is the harmonic scaling/spacing, typically 2.
+func Noise2D(x, y, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
-	var sum float64 = 0
+	var sum float64
 	var p [2]float64
 
 	p[0] = x
@@ -270,14 +255,17 @@ func PerlinNoise2D(x, y, alpha, beta float64, n int) float64 {
 	return sum
 }
 
-// Generates 3-dimensional Perlin Noise
-func PerlinNoise3D(x, y, z, alpha, beta float64, n int) float64 {
+// Noise3D Generates 3-dimensional Perlin Noise value
+// In what follows "alpha" is the weight when the sum is formed.
+// Typically it is 2, As this approaches 1 the function is noisier.
+// "beta" is the harmonic scaling/spacing, typically 2.
+func Noise3D(x, y, z, alpha, beta float64, n int) float64 {
 	var scale float64 = 1
-	var sum float64 = 0
+	var sum float64
 	var p [3]float64
 
 	if z < 0.0000 {
-		return PerlinNoise2D(x, y, alpha, beta, n)
+		return Noise2D(x, y, alpha, beta, n)
 	}
 	p[0] = x
 	p[1] = y
