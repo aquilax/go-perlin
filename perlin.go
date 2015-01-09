@@ -1,8 +1,8 @@
+// Package perlin provides coherent noise function over 1, 2 or 3 dimensions
+// This code is go adaptagion based on C implementation that can be found here:
+// http://git.gnome.org/browse/gegl/tree/operations/common/perlin/perlin.c
+// (original copyright Ken Perlin)
 package perlin
-
-// Addapted from http://git.gnome.org/browse/gegl/tree/operations/common/perlin/perlin.c
-// Coherent noise function over 1, 2 or 3 dimensions
-// (copyright Ken Perlin)
 
 import (
 	"math"
