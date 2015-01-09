@@ -16,6 +16,7 @@ const (
 	BM = 0xff
 )
 
+// Perlin is the noise generator
 type Perlin struct {
 	alpha float64
 	beta  float64
@@ -27,6 +28,11 @@ type Perlin struct {
 	g1 [B + B + 2]float64
 }
 
+// NewPerlin creates new Perlin noise generator
+// In what follows "alpha" is the weight when the sum is formed.
+// Typically it is 2, As this approaches 1 the function is noisier.
+// "beta" is the harmonic scaling/spacing, typically 2, n is the
+// number of iterations and seed is the math.rand seed value to use
 func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
 	var p Perlin
 	var i int
@@ -223,9 +229,6 @@ func (p *Perlin) noise3(vec [3]float64) float64 {
 }
 
 // Noise1D generates 1-dimensional Perlin Noise value
-// In what follows "alpha" is the weight when the sum is formed.
-// Typically it is 2, As this approaches 1 the function is noisier.
-// "beta" is the harmonic scaling/spacing, typically 2.
 func (p *Perlin) Noise1D(x float64) float64 {
 	var scale float64 = 1
 	var sum float64
@@ -241,9 +244,6 @@ func (p *Perlin) Noise1D(x float64) float64 {
 }
 
 // Noise2D Generates 2-dimensional Perlin Noise value
-// In what follows "alpha" is the weight when the sum is formed.
-// Typically it is 2, As this approaches 1 the function is noisier.
-// "beta" is the harmonic scaling/spacing, typically 2.
 func (p *Perlin) Noise2D(x, y float64) float64 {
 	var scale float64 = 1
 	var sum float64
@@ -263,9 +263,6 @@ func (p *Perlin) Noise2D(x, y float64) float64 {
 }
 
 // Noise3D Generates 3-dimensional Perlin Noise value
-// In what follows "alpha" is the weight when the sum is formed.
-// Typically it is 2, As this approaches 1 the function is noisier.
-// "beta" is the harmonic scaling/spacing, typically 2.
 func (p *Perlin) Noise3D(x, y, z float64) float64 {
 	var scale float64 = 1
 	var sum float64
