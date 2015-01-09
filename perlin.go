@@ -1,13 +1,12 @@
 package perlin
 
 // Addapted from http://git.gnome.org/browse/gegl/tree/operations/common/perlin/perlin.c
-//  Coherent noise function over 1, 2 or 3 dimensions
+// Coherent noise function over 1, 2 or 3 dimensions
 // (copyright Ken Perlin)
 
 import (
 	"math"
 	"math/rand"
-	"time"
 )
 
 // General constants
@@ -17,53 +16,62 @@ const (
 	BM = 0xff
 )
 
-var (
-	p [B + B + 2]int
+type Perlin struct {
+	alpha float64
+	beta  float64
+	n     int
 
+	p  [B + B + 2]int
 	g3 [B + B + 2][3]float64
 	g2 [B + B + 2][2]float64
 	g1 [B + B + 2]float64
-)
+}
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-
+func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
+	var p Perlin
 	var i int
 
+	p.alpha = alpha
+	p.beta = beta
+	p.n = n
+
+	rand.Seed(seed)
+
 	for i = 0; i < B; i++ {
-		p[i] = i
-		g1[i] = float64((rand.Int()%(B+B))-B) / B
+		p.p[i] = i
+		p.g1[i] = float64((rand.Int()%(B+B))-B) / B
 
 		for j := 0; j < 2; j++ {
-			g2[i][j] = float64((rand.Int()%(B+B))-B) / B
+			p.g2[i][j] = float64((rand.Int()%(B+B))-B) / B
 		}
 
-		normalize2(&g2[i])
+		normalize2(&p.g2[i])
 
 		for j := 0; j < 3; j++ {
-			g3[i][j] = float64((rand.Int()%(B+B))-B) / B
+			p.g3[i][j] = float64((rand.Int()%(B+B))-B) / B
 		}
-		normalize3(&g3[i])
+		normalize3(&p.g3[i])
 	}
 
 	for ; i > 0; i-- {
-		k := p[i]
+		k := p.p[i]
 		j := rand.Int() % B
-		p[i] = p[j]
-		p[j] = k
+		p.p[i] = p.p[j]
+		p.p[j] = k
 	}
 
 	for i := 0; i < B+2; i++ {
-		p[B+i] = p[i]
-		g1[B+i] = g1[i]
+		p.p[B+i] = p.p[i]
+		p.g1[B+i] = p.g1[i]
 		for j := 0; j < 2; j++ {
-			g2[B+i][j] = g2[i][j]
+			p.g2[B+i][j] = p.g2[i][j]
 		}
 		for j := 0; j < 3; j++ {
-			g3[B+i][j] = g3[i][j]
+			p.g3[B+i][j] = p.g3[i][j]
 		}
 	}
 
+	return &p
 }
 
 func normalize2(v *[2]float64) {
@@ -95,8 +103,7 @@ func lerp(t, a, b float64) float64 {
 	return a + t*(b-a)
 }
 
-func noise1(arg float64) float64 {
-
+func (p *Perlin) noise1(arg float64) float64 {
 	var vec [1]float64
 	vec[0] = arg
 
@@ -107,13 +114,13 @@ func noise1(arg float64) float64 {
 	rx1 := rx0 - 1.
 
 	sx := sCurve(rx0)
-	u := rx0 * g1[p[bx0]]
-	v := rx1 * g1[p[bx1]]
+	u := rx0 * p.g1[p.p[bx0]]
+	v := rx1 * p.g1[p.p[bx1]]
 
 	return lerp(sx, u, v)
 }
 
-func noise2(vec [2]float64) float64 {
+func (p *Perlin) noise2(vec [2]float64) float64 {
 
 	t := vec[0] + N
 	bx0 := int(t) & BM
@@ -127,33 +134,33 @@ func noise2(vec [2]float64) float64 {
 	ry0 := t - float64(int(t))
 	ry1 := ry0 - 1.
 
-	i := p[bx0]
-	j := p[bx1]
+	i := p.p[bx0]
+	j := p.p[bx1]
 
-	b00 := p[i+by0]
-	b10 := p[j+by0]
-	b01 := p[i+by1]
-	b11 := p[j+by1]
+	b00 := p.p[i+by0]
+	b10 := p.p[j+by0]
+	b01 := p.p[i+by1]
+	b11 := p.p[j+by1]
 
 	sx := sCurve(rx0)
 	sy := sCurve(ry0)
 
-	q := g2[b00]
+	q := p.g2[b00]
 	u := at2(rx0, ry0, q)
-	q = g2[b10]
+	q = p.g2[b10]
 	v := at2(rx1, ry0, q)
 	a := lerp(sx, u, v)
 
-	q = g2[b01]
+	q = p.g2[b01]
 	u = at2(rx0, ry1, q)
-	q = g2[b11]
+	q = p.g2[b11]
 	v = at2(rx1, ry1, q)
 	b := lerp(sx, u, v)
 
 	return lerp(sy, a, b)
 }
 
-func noise3(vec [3]float64) float64 {
+func (p *Perlin) noise3(vec [3]float64) float64 {
 	t := vec[0] + N
 	bx0 := int(t) & BM
 	bx1 := (bx0 + 1) & BM
@@ -172,41 +179,41 @@ func noise3(vec [3]float64) float64 {
 	rz0 := t - float64(int(t))
 	rz1 := rz0 - 1.
 
-	i := p[bx0]
-	j := p[bx1]
+	i := p.p[bx0]
+	j := p.p[bx1]
 
-	b00 := p[i+by0]
-	b10 := p[j+by0]
-	b01 := p[i+by1]
-	b11 := p[j+by1]
+	b00 := p.p[i+by0]
+	b10 := p.p[j+by0]
+	b01 := p.p[i+by1]
+	b11 := p.p[j+by1]
 
 	t = sCurve(rx0)
 	sy := sCurve(ry0)
 	sz := sCurve(rz0)
 
-	q := g3[b00+bz0]
+	q := p.g3[b00+bz0]
 	u := at3(rx0, ry0, rz0, q)
-	q = g3[b10+bz0]
+	q = p.g3[b10+bz0]
 	v := at3(rx1, ry0, rz0, q)
 	a := lerp(t, u, v)
 
-	q = g3[b01+bz0]
+	q = p.g3[b01+bz0]
 	u = at3(rx0, ry1, rz0, q)
-	q = g3[b11+bz0]
+	q = p.g3[b11+bz0]
 	v = at3(rx1, ry1, rz0, q)
 	b := lerp(t, u, v)
 
 	c := lerp(sy, a, b)
 
-	q = g3[b00+bz1]
+	q = p.g3[b00+bz1]
 	u = at3(rx0, ry0, rz1, q)
-	q = g3[b10+bz1]
+	q = p.g3[b10+bz1]
 	v = at3(rx1, ry0, rz1, q)
 	a = lerp(t, u, v)
 
-	q = g3[b01+bz1]
+	q = p.g3[b01+bz1]
 	u = at3(rx0, ry1, rz1, q)
-	q = g3[b11+bz1]
+	q = p.g3[b11+bz1]
 	v = at3(rx1, ry1, rz1, q)
 	b = lerp(t, u, v)
 
@@ -219,16 +226,16 @@ func noise3(vec [3]float64) float64 {
 // In what follows "alpha" is the weight when the sum is formed.
 // Typically it is 2, As this approaches 1 the function is noisier.
 // "beta" is the harmonic scaling/spacing, typically 2.
-func Noise1D(x, alpha, beta float64, n int) float64 {
+func (p *Perlin) Noise1D(x float64) float64 {
 	var scale float64 = 1
 	var sum float64
-	p := x
+	px := x
 
-	for i := 0; i < n; i++ {
-		val := noise1(p)
+	for i := 0; i < p.n; i++ {
+		val := p.noise1(px)
 		sum += val / scale
-		scale *= alpha
-		p *= beta
+		scale *= p.alpha
+		px *= p.beta
 	}
 	return sum
 }
@@ -237,20 +244,20 @@ func Noise1D(x, alpha, beta float64, n int) float64 {
 // In what follows "alpha" is the weight when the sum is formed.
 // Typically it is 2, As this approaches 1 the function is noisier.
 // "beta" is the harmonic scaling/spacing, typically 2.
-func Noise2D(x, y, alpha, beta float64, n int) float64 {
+func (p *Perlin) Noise2D(x, y float64) float64 {
 	var scale float64 = 1
 	var sum float64
-	var p [2]float64
+	var px [2]float64
 
-	p[0] = x
-	p[1] = y
+	px[0] = x
+	px[1] = y
 
-	for i := 0; i < n; i++ {
-		val := noise2(p)
+	for i := 0; i < p.n; i++ {
+		val := p.noise2(px)
 		sum += val / scale
-		scale *= alpha
-		p[0] *= beta
-		p[1] *= beta
+		scale *= p.alpha
+		px[0] *= p.beta
+		px[1] *= p.beta
 	}
 	return sum
 }
@@ -259,25 +266,25 @@ func Noise2D(x, y, alpha, beta float64, n int) float64 {
 // In what follows "alpha" is the weight when the sum is formed.
 // Typically it is 2, As this approaches 1 the function is noisier.
 // "beta" is the harmonic scaling/spacing, typically 2.
-func Noise3D(x, y, z, alpha, beta float64, n int) float64 {
+func (p *Perlin) Noise3D(x, y, z float64) float64 {
 	var scale float64 = 1
 	var sum float64
-	var p [3]float64
+	var px [3]float64
 
 	if z < 0.0000 {
-		return Noise2D(x, y, alpha, beta, n)
+		return p.Noise2D(x, y)
 	}
-	p[0] = x
-	p[1] = y
-	p[2] = z
+	px[0] = x
+	px[1] = y
+	px[2] = z
 
-	for i := 0; i < n; i++ {
-		val := noise3(p)
+	for i := 0; i < p.n; i++ {
+		val := p.noise3(px)
 		sum += val / scale
-		scale *= alpha
-		p[0] *= beta
-		p[1] *= beta
-		p[2] *= beta
+		scale *= p.alpha
+		px[0] *= p.beta
+		px[1] *= p.beta
+		px[2] *= p.beta
 	}
 	return sum
 }
