@@ -2,8 +2,8 @@ package perlin_test
 
 import (
 	"fmt"
-
 	"github.com/aquilax/go-perlin"
+	"math/rand"
 )
 
 const (
@@ -12,6 +12,17 @@ const (
 	n           = 3
 	seed  int64 = 100
 )
+
+func ExamplePerlin_NewPerlinRandSource() {
+	p := perlin.NewPerlinRandSource(alpha, beta, n, rand.NewSource(seed))
+	for x := 0.; x < 3; x++ {
+		fmt.Printf("%0.0f\t%0.4f\n", x, p.Noise1D(x/10))
+	}
+	// Output:
+	// 0	0.0000
+	// 1	-0.1670
+	// 2	-0.2011
+}
 
 func ExamplePerlin_Noise1D() {
 	p := perlin.NewPerlin(alpha, beta, n, seed)
