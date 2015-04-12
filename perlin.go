@@ -41,27 +41,27 @@ func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
 	p.beta = beta
 	p.n = n
 
-	rand.Seed(seed)
+	r := rand.New(rand.NewSource(seed))
 
 	for i = 0; i < B; i++ {
 		p.p[i] = i
-		p.g1[i] = float64((rand.Int()%(B+B))-B) / B
+		p.g1[i] = float64((r.Int()%(B+B))-B) / B
 
 		for j := 0; j < 2; j++ {
-			p.g2[i][j] = float64((rand.Int()%(B+B))-B) / B
+			p.g2[i][j] = float64((r.Int()%(B+B))-B) / B
 		}
 
 		normalize2(&p.g2[i])
 
 		for j := 0; j < 3; j++ {
-			p.g3[i][j] = float64((rand.Int()%(B+B))-B) / B
+			p.g3[i][j] = float64((r.Int()%(B+B))-B) / B
 		}
 		normalize3(&p.g3[i])
 	}
 
 	for ; i > 0; i-- {
 		k := p.p[i]
-		j := rand.Int() % B
+		j := r.Int() % B
 		p.p[i] = p.p[j]
 		p.p[j] = k
 	}
