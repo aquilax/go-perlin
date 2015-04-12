@@ -34,6 +34,15 @@ type Perlin struct {
 // "beta" is the harmonic scaling/spacing, typically 2, n is the
 // number of iterations and seed is the math.rand seed value to use
 func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
+	return NewPerlinRandSource(alpha, beta, n, rand.NewSource(seed))
+}
+
+// NewPerlinRandSource creates new Perlin noise generator
+// In what follows "alpha" is the weight when the sum is formed.
+// Typically it is 2, As this approaches 1 the function is noisier.
+// "beta" is the harmonic scaling/spacing, typically 2, n is the
+// number of iterations and source is source of pseudo-random int64 values
+func NewPerlinRandSource(alpha, beta float64, n int, source rand.Source) *Perlin {
 	var p Perlin
 	var i int
 
@@ -41,7 +50,7 @@ func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
 	p.beta = beta
 	p.n = n
 
-	r := rand.New(rand.NewSource(seed))
+	r := rand.New(source)
 
 	for i = 0; i < B; i++ {
 		p.p[i] = i
