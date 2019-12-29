@@ -44,7 +44,7 @@ func NewPerlin(alpha, beta float64, n int, seed int64) *Perlin {
 // number of iterations and source is source of pseudo-random int64 values
 func NewPerlinRandSource(alpha, beta float64, n int, source rand.Source) *Perlin {
 	var p Perlin
-	var i int
+	var i, j, k int
 
 	p.alpha = alpha
 	p.beta = beta
@@ -56,32 +56,32 @@ func NewPerlinRandSource(alpha, beta float64, n int, source rand.Source) *Perlin
 		p.p[i] = i
 		p.g1[i] = float64((r.Int()%(B+B))-B) / B
 
-		for j := 0; j < 2; j++ {
+		for j = 0; j < 2; j++ {
 			p.g2[i][j] = float64((r.Int()%(B+B))-B) / B
 		}
 
 		normalize2(&p.g2[i])
 
-		for j := 0; j < 3; j++ {
+		for j = 0; j < 3; j++ {
 			p.g3[i][j] = float64((r.Int()%(B+B))-B) / B
 		}
 		normalize3(&p.g3[i])
 	}
 
 	for ; i > 0; i-- {
-		k := p.p[i]
-		j := r.Int() % B
+		k = p.p[i]
+		j = r.Int() % B
 		p.p[i] = p.p[j]
 		p.p[j] = k
 	}
 
-	for i := 0; i < B+2; i++ {
+	for i = 0; i < B+2; i++ {
 		p.p[B+i] = p.p[i]
 		p.g1[B+i] = p.g1[i]
-		for j := 0; j < 2; j++ {
+		for j = 0; j < 2; j++ {
 			p.g2[B+i][j] = p.g2[i][j]
 		}
-		for j := 0; j < 3; j++ {
+		for j = 0; j < 3; j++ {
 			p.g3[B+i][j] = p.g3[i][j]
 		}
 	}
@@ -136,7 +136,6 @@ func (p *Perlin) noise1(arg float64) float64 {
 }
 
 func (p *Perlin) noise2(vec [2]float64) float64 {
-
 	t := vec[0] + N
 	bx0 := int(t) & BM
 	bx1 := (bx0 + 1) & BM
@@ -240,11 +239,12 @@ func (p *Perlin) noise3(vec [3]float64) float64 {
 // Noise1D generates 1-dimensional Perlin Noise value
 func (p *Perlin) Noise1D(x float64) float64 {
 	var scale float64 = 1
-	var sum float64
+	var sum, val float64
+
 	px := x
 
 	for i := 0; i < p.n; i++ {
-		val := p.noise1(px)
+		val = p.noise1(px)
 		sum += val / scale
 		scale *= p.alpha
 		px *= p.beta
@@ -255,14 +255,14 @@ func (p *Perlin) Noise1D(x float64) float64 {
 // Noise2D Generates 2-dimensional Perlin Noise value
 func (p *Perlin) Noise2D(x, y float64) float64 {
 	var scale float64 = 1
-	var sum float64
+	var sum, val float64
 	var px [2]float64
 
 	px[0] = x
 	px[1] = y
 
 	for i := 0; i < p.n; i++ {
-		val := p.noise2(px)
+		val = p.noise2(px)
 		sum += val / scale
 		scale *= p.alpha
 		px[0] *= p.beta
@@ -274,18 +274,19 @@ func (p *Perlin) Noise2D(x, y float64) float64 {
 // Noise3D Generates 3-dimensional Perlin Noise value
 func (p *Perlin) Noise3D(x, y, z float64) float64 {
 	var scale float64 = 1
-	var sum float64
+	var sum, val float64
 	var px [3]float64
 
 	if z < 0.0000 {
 		return p.Noise2D(x, y)
 	}
+
 	px[0] = x
 	px[1] = y
 	px[2] = z
 
 	for i := 0; i < p.n; i++ {
-		val := p.noise3(px)
+		val = p.noise3(px)
 		sum += val / scale
 		scale *= p.alpha
 		px[0] *= p.beta

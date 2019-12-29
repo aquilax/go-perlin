@@ -37,3 +37,23 @@ func TestPerlinNoise3D(t *testing.T) {
 		t.Logf("Wrong node result: given: %f, expected: %f", noise, expected)
 	}
 }
+
+func BenchmarkPerlinNoise1D(b *testing.B) {
+	p := NewPerlin(2, 2, 3, seed)
+	for n := 0; n < b.N; n++ {
+		p.Noise1D(10)
+	}
+}
+
+func BenchmarkPerlinNoise2D(b *testing.B) {
+	p := NewPerlin(2, 2, 3, seed)
+	for n := 0; n < b.N; n++ {
+		p.Noise2D(10, 10)
+	}
+}
+func BenchmarkPerlinNoise3D(b *testing.B) {
+	p := NewPerlin(2, 2, 3, seed)
+	for n := 0; n < b.N; n++ {
+		p.Noise3D(10, 10, 10)
+	}
+}
