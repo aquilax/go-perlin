@@ -8,7 +8,7 @@ const (
 	seed = 123
 )
 
-func TestPerlinNoise1D(t *testing.T) {
+func Test_PerlinNoise1D(t *testing.T) {
 	expected := 0.0
 	p := NewPerlin(2, 2, 3, seed)
 	noise := p.Noise1D(10)
@@ -18,7 +18,7 @@ func TestPerlinNoise1D(t *testing.T) {
 	}
 }
 
-func TestPerlinNoise2D(t *testing.T) {
+func Test_PerlinNoise2D(t *testing.T) {
 	expected := 0.0
 	p := NewPerlin(2, 2, 3, seed)
 	noise := p.Noise2D(10, 10)
@@ -28,7 +28,7 @@ func TestPerlinNoise2D(t *testing.T) {
 	}
 }
 
-func TestPerlinNoise3D(t *testing.T) {
+func Test_PerlinNoise3D(t *testing.T) {
 	expected := 0.0
 	p := NewPerlin(2, 2, 3, seed)
 	noise := p.Noise3D(10, 10, 10)
@@ -38,20 +38,20 @@ func TestPerlinNoise3D(t *testing.T) {
 	}
 }
 
-func BenchmarkPerlinNoise1D(b *testing.B) {
+func Benchmark_PerlinNoise1D(b *testing.B) {
 	p := NewPerlin(2, 2, 3, seed)
 	for n := 0; n < b.N; n++ {
 		p.Noise1D(10)
 	}
 }
 
-func BenchmarkPerlinNoise2D(b *testing.B) {
+func Benchmark_PerlinNoise2D(b *testing.B) {
 	p := NewPerlin(2, 2, 3, seed)
 	for n := 0; n < b.N; n++ {
 		p.Noise2D(10, 10)
 	}
 }
-func BenchmarkPerlinNoise3D(b *testing.B) {
+func Benchmark_PerlinNoise3D(b *testing.B) {
 	p := NewPerlin(2, 2, 3, seed)
 	for n := 0; n < b.N; n++ {
 		p.Noise3D(10, 10, 10)
