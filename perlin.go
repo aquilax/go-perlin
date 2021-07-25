@@ -1,5 +1,5 @@
 // Package perlin provides coherent noise function over 1, 2 or 3 dimensions
-// This code is go adaptagion based on C implementation that can be found here:
+// This code is go adaptation based on C implementation that can be found here:
 // http://git.gnome.org/browse/gegl/tree/operations/common/perlin/perlin.c
 // (original copyright Ken Perlin)
 package perlin
@@ -44,7 +44,7 @@ func NewPerlin(alpha, beta float64, n int32, seed int64) *Perlin {
 // number of iterations and source is source of pseudo-random int64 values
 func NewPerlinRandSource(alpha, beta float64, n int32, source rand.Source) *Perlin {
 	var p Perlin
-	var i, j, k int32
+	var i, j int32
 
 	p.alpha = alpha
 	p.beta = beta
@@ -69,15 +69,12 @@ func NewPerlinRandSource(alpha, beta float64, n int32, source rand.Source) *Perl
 	}
 
 	for ; i > 0; i-- {
-		k = p.p[i]
 		j = r.Int31() % B
-		p.p[i] = p.p[j]
-		p.p[j] = k
+		p.p[i], p.p[j] = p.p[j], p.p[i]
 	}
 
 	for i = 0; i < B+2; i++ {
-		p.p[B+i] = p.p[i]
-		p.g1[B+i] = p.g1[i]
+		p.p[B+i], p.g1[B+i] = p.p[i], p.g1[i]
 		for j = 0; j < 2; j++ {
 			p.g2[B+i][j] = p.g2[i][j]
 		}
@@ -91,15 +88,12 @@ func NewPerlinRandSource(alpha, beta float64, n int32, source rand.Source) *Perl
 
 func normalize2(v *[2]float64) {
 	s := math.Sqrt(v[0]*v[0] + v[1]*v[1])
-	v[0] = v[0] / s
-	v[1] = v[1] / s
+	v[0], v[1] = v[0]/s, v[1]/s
 }
 
 func normalize3(v *[3]float64) {
 	s := math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
-	v[0] = v[0] / s
-	v[1] = v[1] / s
-	v[2] = v[2] / s
+	v[0], v[1], v[2] = v[0]/s, v[1]/s, v[2]/s
 }
 
 func at2(rx, ry float64, q [2]float64) float64 {
@@ -256,11 +250,8 @@ func (p *Perlin) Noise1D(x float64) float64 {
 func (p *Perlin) Noise2D(x, y float64) float64 {
 	var scale float64 = 1
 	var sum, val float64
-	var px [2]float64
 	var i int32
-
-	px[0] = x
-	px[1] = y
+	px := [2]float64{x, y}
 
 	for i = 0; i < p.n; i++ {
 		val = p.noise2(px)
@@ -276,16 +267,12 @@ func (p *Perlin) Noise2D(x, y float64) float64 {
 func (p *Perlin) Noise3D(x, y, z float64) float64 {
 	var scale float64 = 1
 	var sum, val float64
-	var px [3]float64
 	var i int32
+	px := [3]float64{x, y, z}
 
 	if z < 0.0000 {
 		return p.Noise2D(x, y)
 	}
-
-	px[0] = x
-	px[1] = y
-	px[2] = z
 
 	for i = 0; i < p.n; i++ {
 		val = p.noise3(px)
